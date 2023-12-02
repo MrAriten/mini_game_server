@@ -2,6 +2,8 @@ local skynet = require "skynet"
 local socket = require "skynet.socket"
 local s = require "service"
 local runconfig = require "runconfig"
+local pb = require "protobuf"
+
 
 conns = {} --[socket_id] = conn
 players = {} --[playerid] = gateplayer
@@ -53,7 +55,11 @@ s.resp.send_by_fd = function(source, fd, msg)
     
     local buff = str_pack(msg[1], msg)
     skynet.error("send "..fd.." ["..msg[1].."] {"..table.concat( msg, ",").."}")
-	socket.write(fd, buff)
+    local msg = {
+        data = buff
+    }
+    msg = pb.encode("client.Client",msg)
+	socket.write(fd, msg)
 end
 
 s.resp.send = function(source, playerid, msg)--发现消息到客户端，这个函数由其他的sevice调用
@@ -150,8 +156,10 @@ end
 
 
 local process_buff = function(fd, readbuff)
+    
     while true do
         local msgstr, rest = string.match( readbuff, "(.-)\r\n(.*)")--获取消息队列中最前的消息--要在这之前处理proto解码！
+        skynet.error(msgstr)
         if msgstr then
             readbuff = rest
             process_msg(fd, msgstr)
@@ -172,8 +180,9 @@ local recv_loop = function(fd)
     while true do
         local recvstr = socket.read(fd) --read无第二参数，说明尽力读取，会阻塞
         if recvstr then
+            local pb_data = pb.decode("client.Client", recvstr)
             --这里要proto.decode，假客户端传来的是protobuf编码的消息
-            readbuff = readbuff..recvstr--将读取到的信息追加到buff上
+            readbuff = readbuff..pb_data.data--将读取到的信息追加到buff上
             readbuff = process_buff(fd, readbuff)
         else
             skynet.error("socket close " ..fd) --如果没有返回为空，说明连接关闭
@@ -197,6 +206,7 @@ function s.init() --服务器启动后，调用init()
     local node = skynet.getenv("node")--从config中获取当前的node节点
     local nodecfg = runconfig[node]--从当前的node节点获取配置
     local port = nodecfg.gateway[s.id].port--获取gateway的端口
+    pb.register_file("service/gateway/proto/client.pb")
 
     local listenfd = socket.listen("0.0.0.0", port)--在当前gateway端口启动监听，开始获取客户端信息
     skynet.error("Listen socket :", "0.0.0.0", port)

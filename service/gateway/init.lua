@@ -53,13 +53,28 @@ s.resp.send_by_fd = function(source, fd, msg)
         return
     end
     
-    local buff = str_pack(msg[1], msg)
-    skynet.error("send "..fd.." ["..msg[1].."] {"..table.concat( msg, ",").."}")
-    local msg = {
-        data = buff
+    --local buff = str_pack(msg[1], msg)
+    --skynet.error("send "..fd.." ["..msg[1].."] {"..table.concat( msg, ",").."}")
+    local sendmsg = {
+        first_element = msg[1],
+        integer_elements = {},
     }
-    msg = pb.encode("client.Client",msg)
-	socket.write(fd, msg)
+    local optional_string_found = false  -- 用于标记是否找到了可选字符串元素
+    -- 从第二个元素开始，将整数元素添加到integer_elements表格中
+    for i = 2, #msg do
+        local element = msg[i]
+
+        if type(element) == "string" and not optional_string_found then
+            sendmsg.optional_string_element = element
+            optional_string_found = true
+        elseif type(element) == "number" then
+            table.insert(sendmsg.integer_elements, element)
+        else
+            -- 处理其他情况，这里可以根据实际需要进行扩展
+        end
+    end
+    sendmsg = pb.encode("client.Client",sendmsg)
+	socket.write(fd, sendmsg)
 end
 
 s.resp.send = function(source, playerid, msg)--发现消息到客户端，这个函数由其他的sevice调用
@@ -159,7 +174,6 @@ local process_buff = function(fd, readbuff)
     
     while true do
         local msgstr, rest = string.match( readbuff, "(.-)\r\n(.*)")--获取消息队列中最前的消息--要在这之前处理proto解码！
-        skynet.error(msgstr)
         if msgstr then
             readbuff = rest
             process_msg(fd, msgstr)
@@ -172,7 +186,6 @@ end
 --每一条连接接收数据处理
 --协议格式 cmd,arg1,arg2,...#
 --这里收到的都是客户端的消息
---可能传来的消息有{login,}
 local recv_loop = function(fd)
     socket.start(fd)
     skynet.error("socket connected " ..fd)
@@ -182,7 +195,7 @@ local recv_loop = function(fd)
         if recvstr then
             local pb_data = pb.decode("client.Client", recvstr)
             --这里要proto.decode，假客户端传来的是protobuf编码的消息
-            readbuff = readbuff..pb_data.data--将读取到的信息追加到buff上
+            readbuff = readbuff..pb_data.first_element--将读取到的信息追加到buff上
             readbuff = process_buff(fd, readbuff)
         else
             skynet.error("socket close " ..fd) --如果没有返回为空，说明连接关闭

@@ -58,7 +58,11 @@ end
 --下面的 M. 开头的函数才是M的成员函数
 function M.start(name, id, ...) --这个函数在每个service中都会被调用，属于是服务的启动器
 	M.name = name
-	M.id = tonumber(id)--记录成员变量
+	if(name ~= "agent") then
+		M.id = tonumber(id)--记录成员变量
+    else
+		M.id = id
+	end
 	skynet.start(init)--用skynet.start调用init函数
 end
 

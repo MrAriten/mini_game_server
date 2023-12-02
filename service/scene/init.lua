@@ -167,6 +167,7 @@ s.init = function()
         local stime = skynet.now()
         local frame = 0
         while true do
+            --skynet.error("frame:"..frame)
             frame = frame + 1
             local isok, err = pcall(update, frame)
             if not isok then

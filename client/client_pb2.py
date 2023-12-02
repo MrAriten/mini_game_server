@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0c\x63lient.proto\x12\x06\x63lient\"\x16\n\x06\x43lient\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\tb\x06proto3'
+  serialized_pb=b'\n\x0c\x63lient.proto\x12\x06\x63lient\"^\n\x06\x43lient\x12\x15\n\rfirst_element\x18\x01 \x01(\t\x12\x1c\n\x10integer_elements\x18\x02 \x03(\x05\x42\x02\x10\x01\x12\x1f\n\x17optional_string_element\x18\x03 \x01(\tb\x06proto3'
 )
 
 
@@ -34,8 +34,22 @@ _CLIENT = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='data', full_name='client.Client.data', index=0,
+      name='first_element', full_name='client.Client.first_element', index=0,
       number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='integer_elements', full_name='client.Client.integer_elements', index=1,
+      number=2, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\020\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='optional_string_element', full_name='client.Client.optional_string_element', index=2,
+      number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -53,7 +67,7 @@ _CLIENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=24,
-  serialized_end=46,
+  serialized_end=118,
 )
 
 DESCRIPTOR.message_types_by_name['Client'] = _CLIENT
@@ -67,4 +81,5 @@ Client = _reflection.GeneratedProtocolMessageType('Client', (_message.Message,),
 _sym_db.RegisterMessage(Client)
 
 
+_CLIENT.fields_by_name['integer_elements']._options = None
 # @@protoc_insertion_point(module_scope)

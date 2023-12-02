@@ -2,5 +2,10 @@ syntax = "proto3";
 package client;
 
 message Client {
-  string data = 1;
+  // 第一个元素是字符串
+  string first_element = 1;
+  // 后续元素都是整数
+  repeated int32 integer_elements = 2 [packed=true];
+  // 第三个元素可能是字符串
+  string optional_string_element = 3;
 }

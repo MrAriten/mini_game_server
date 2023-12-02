@@ -65,6 +65,8 @@ s.leave_scene = function()
     if not s.sname then
         return
     end
+    s.data.coin = s.data.coin + 1
+	local res = db:query("UPDATE player SET coin = coin + 1 WHERE player_id = '"..playerid.."';")
     s.call(s.snode, s.sname, "leave", s.id)--向scene发送退出战场的消息
     s.snode = nil
     s.sname = nil

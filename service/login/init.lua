@@ -76,11 +76,11 @@ function s.init()
         port=3306,
         database="game_server",
         user="root",
-        password="Yt544128289",
+        password="*****",
         max_packet_size = 1024 * 1024,
         on_connect = nil
     })
-    rds = redis.connect({ auth = "Yt544128289", db = 1, host = "127.0.0.1", port = 6379})
+    rds = redis.connect({ auth = "*****", db = 1, host = "127.0.0.1", port = 6379})
 
 end
 

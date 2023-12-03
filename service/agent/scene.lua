@@ -66,6 +66,8 @@ s.leave_scene = function()
         return
     end
     s.data.coin = s.data.coin + 1
+    --更新mysql的同时要删除缓存
+    rds:del(playerid.."_coin")
 	local res = db:query("UPDATE player SET coin = coin + 1 WHERE player_id = '"..playerid.."';")
     s.call(s.snode, s.sname, "leave", s.id)--向scene发送退出战场的消息
     s.snode = nil

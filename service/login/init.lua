@@ -2,6 +2,7 @@
 local skynet = require "skynet"
 local s = require "service"
 local mysql = require "skynet.db.mysql"
+local redis = require "skynet.db.redis"
 
 s.client = {}
 s.resp.client = function(source, fd, cmd, msg)--client是用来封装处理服务器功能的，这样可以便于之后拓展处理客户端信息的功能
@@ -37,15 +38,24 @@ s.client.login = function(fd, msg, source)--处理登录请求
 	local gate = source
 	node = skynet.getenv("node")--获取当前节点信息
     --校验用户名密码--这里调用mysql数据库，根据playerid获取密码
-
-	local resp_db = db:query("select * from player where player_id = '"..playerid.."'");
-	if resp_db[1] == nil then
-		return {"login", 1, "账号不存在"}
+	
+	local check_pwd = rds:get(playerid.."_password") --查询redis缓存
+	if not check_pwd then
+		local resp_db = db:query("select * from player where player_id = '"..playerid.."'") --没有则查询mysql
+		if resp_db[1] == nil then
+			return {"login", 1, "账号不存在"}
+		end
+		if pw ~= resp_db[1].password then
+			rds:set(playerid.."_password",resp_db[1].password) --有账号那就把密码存入缓存
+			return {"login", 1, "密码错误"}
+		end
+	else --如果缓存存在，那么查看密码是否匹配
+		if pw ~= check_pwd then
+			return {"login", 1, "密码错误"}
+		end
 	end
 
-	if pw ~= resp_db[1].password then
-		return {"login", 1, "密码错误"}
-	end
+
 	--发给agentmgr
 	local isok, agent = skynet.call("agentmgr", "lua", "reqlogin", playerid, node, gate)--call为阻塞调用
 	if not isok then
@@ -70,6 +80,8 @@ function s.init()
         max_packet_size = 1024 * 1024,
         on_connect = nil
     })
+    rds = redis.connect({ auth = "Yt544128289", db = 1, host = "127.0.0.1", port = 6379})
+
 end
 
 s.start(...)

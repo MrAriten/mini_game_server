@@ -1,6 +1,7 @@
 local skynet = require "skynet"
 local s = require "service"
 local mysql = require "skynet.db.mysql"
+local redis = require "skynet.db.redis"
 
 s.client = {}
 s.gate = nil
@@ -21,8 +22,14 @@ s.resp.client = function(source, cmd, msg)
 end
 
 s.client.check = function(msg) --手动查看用户的数据
-	--这里仅展示用户的金币，仅调用redis
-	return {"check", s.data.coin}
+	--这里仅展示用户的金币，先查看缓存，缓存没有则调用mysql
+	local player_coin = rds:get(playerid.."_coin")
+	if not player_coin then
+		local resp_db = db:query("select * from player where player_id = '"..playerid.."'");
+		rds:set(playerid.."_coin",resp_db[1].coin)
+		player_coin = resp_db[1].coin
+	end
+	return {"用户"..playerid.."当前的金币：", player_coin}
 end
 
 s.resp.kick = function(source) --退出战斗
@@ -51,14 +58,7 @@ s.init = function( )
     })
 	skynet.error(s.id)
 	playerid = s.id
-	--从数据库中读取信息，可以顺便加载到redis缓存中
-	--在此处加载角色数据
-	local resp_db = db:query("select * from player where player_id = '"..playerid.."'");
-	skynet.error("reading data")
-	s.data = {
-		coin = resp_db[1].coin,
-		hp = 200,
-	}
+	rds = redis.connect({ auth = "Yt544128289", db = 1, host = "127.0.0.1", port = 6379})
 end
 
 s.start(...)

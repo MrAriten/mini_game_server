@@ -29,7 +29,7 @@ s.client.check = function(msg) --手动查看用户的数据
 		rds:set(playerid.."_coin",resp_db[1].coin)
 		player_coin = resp_db[1].coin
 	end
-	return {"用户"..playerid.."当前的金币：", player_coin}
+	return {"用户"..playerid.."当前的金币："..player_coin}
 end
 
 s.resp.kick = function(source) --退出战斗
@@ -39,6 +39,7 @@ s.resp.kick = function(source) --退出战斗
 end
 
 s.resp.exit = function(source) --关闭服务
+	rds:del(playerid.."_coin") --删除缓存
 	skynet.exit()
 end
 

@@ -65,7 +65,6 @@ s.leave_scene = function()
     if not s.sname then
         return
     end
-    s.data.coin = s.data.coin + 1
     --更新mysql的同时要删除缓存
     rds:del(playerid.."_coin")
 	local res = db:query("UPDATE player SET coin = coin + 1 WHERE player_id = '"..playerid.."';")

@@ -26,17 +26,34 @@
    git clone https://github.com/MrAriten/mini_game_server.git
    ```
 
-2. 在编译完skynet和redis，并安装完mysql后，启动redis服务器和mysql。
+2. probuf安装版本为3.19.0
 
-3. 在`./etc/runconfig.lua`下修改自己想要的服务器节点配置。
+   ```bash
+   pip install protobuf==3.19.0
+   ```
 
-4. 分别在`./service/login/init.lua`和`./serivce/agent/init.lua`的`init()`函数中修改连接mysql和redis的配置
+3. 在编译完skynet和redis和protobuf，并安装完mysql后，启动redis服务器和mysql。
 
-5. 在服务端运行`sudo ./start.sh 1`，数字是你想开启的节点
+4. mysql初始化如下
 
-6. 在客户端修改配置并运行'`/client/client.py`就能和服务端发起连接
+   ```mysql
+   create database game_server;
+   
+   CREATE TABLE player (
+       playerid VARCHAR(255),
+       coin INT
+   );
+   ```
 
-7. 客户端的命令如下
+5. 在`./etc/runconfig.lua`下修改自己想要的服务器节点配置。
+
+6. 分别在`./service/login/init.lua`和`./serivce/agent/init.lua`的`init()`函数中修改连接mysql和redis的配置
+
+7. 在服务端运行`sudo ./start.sh 1`，数字是你想开启的节点
+
+8. 在客户端修改配置并运行'`/client/client.py`就能和服务端发起连接
+
+9. 客户端的命令如下
 
    |            命令            |                             响应                             |
    | :------------------------: | :----------------------------------------------------------: |
@@ -46,7 +63,7 @@
    |           enter            |   随机分配到一个战场，此时服务器会不断更新战场信息给客户端   |
    |           leave            |                      退出战场，进行结算                      |
 
-8. 本项目没有怎么实现战场逻辑，对于退出结算仅是简单的将用户的金币+1。
+10. 本项目没有怎么实现战场逻辑，对于退出结算仅是简单的将用户的金币+1。
 
 
 
